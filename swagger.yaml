@@ -1,0 +1,163 @@
+swagger: "2.0"
+info:
+  description: "API for Weather Station Data including user registration and authentication"
+  version: "1.0.0"
+  title: "Weather Station API"
+host: "localhost:5000"
+basePath: "/"
+schemes:
+- "http"
+
+securityDefinitions:
+  Bearer:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+    description: "JWT Authorization header using the Bearer scheme. Example: 'Authorization: Bearer {token}'"
+
+paths:
+  /users/register:
+    post:
+      summary: "Register a new user"
+      consumes:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "User registration data"
+        required: true
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        201:
+          description: "User registered successfully"
+          
+  /users/login:
+    post:
+      summary: "Login and receive a token"
+      consumes:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "User login credentials"
+        required: true
+        schema:
+          $ref: '#/definitions/UserLogin'
+      responses:
+        200:
+          description: "Login successful, token returned"
+          schema:
+            type: "object"
+            properties:
+              token:
+                type: "string"
+                description: "JWT token"
+                
+  /weather/{district}:
+    get:
+      summary: "Get latest weather data by district"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "district"
+        in: "path"
+        description: "The district name to fetch weather data for"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: '#/definitions/WeatherData'
+        404:
+          description: "District not found"
+      security:
+        - Bearer: []
+        
+  /weather:
+    get:
+      summary: "Get weather data for all districts"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "An array of weather data objects"
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/WeatherData'
+      security:
+        - Bearer: []
+        
+    post:
+      summary: "Post new weather data"
+      consumes:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Weather data object to be added"
+        required: true
+        schema:
+          $ref: '#/definitions/WeatherData'
+      responses:
+        201:
+          description: "Weather data created"
+      security:
+        - Bearer: []
+
+definitions:
+  User:
+    type: "object"
+    required:
+    - "username"
+    - "password"
+    properties:
+      username:
+        type: "string"
+        description: "User's username"
+      password:
+        type: "string"
+        description: "User's password"
+        
+  UserLogin:
+    type: "object"
+    required:
+    - "username"
+    - "password"
+    properties:
+      username:
+        type: "string"
+        description: "User's username"
+      password:
+        type: "string"
+        description: "User's password"
+        
+  WeatherData:
+    type: "object"
+    required:
+    - "district"
+    - "latitude"
+    - "longitude"
+    properties:
+      district:
+        type: "string"
+        description: "The name of the district where the weather station is located"
+      temperature:
+        type: "string"
+        description: "The current temperature"
+      humidity:
+        type: "string"
+        description: "The current humidity percentage"
+      airPressure:
+        type: "string"
+        description: "The current air pressure"
+      latitude:
+        type: "number"
+        format: "double"
+        description: "The latitude of the weather station"
+      longitude:
+        type: "number"
+        format: "double"
+        description: "The longitude of the weather station"
