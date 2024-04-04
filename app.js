@@ -48,13 +48,27 @@ app.get("/weather", authenticate, async (req, res) => {
 
 app.post("/weather", authenticate, async (req, res) => {
   try {
-    const newWeatherData = new WeatherStation(req.body);
-    const savedData = await newWeatherData.save();
+    // Extract district from the request body
+    const { district } = req.body;
+
+    // Define the update and options
+    const update = req.body; // This contains the new weather data to be saved or updated
+    const options = { new: true, upsert: true, setDefaultsOnInsert: true };
+
+    // Find a weather data document by district and update it, or insert if it doesn't exist
+    const savedData = await WeatherStation.findOneAndUpdate(
+      { district },
+      update,
+      options
+    );
+
     res.status(201).json(savedData);
   } catch (error) {
     res.status(500).send(error.message);
   }
 });
+
+
 
 // User Registration
 app.post("/users/register", async (req, res) => {
